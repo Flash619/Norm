@@ -57,7 +57,7 @@ public class Dataset<T> {
         return instances;
     }
 
-    public T create(T instance) {
+    public T add(T instance) {
         return getChangeTracker(instance, EntityState.CREATED).getChangeProxy();
     }
 
