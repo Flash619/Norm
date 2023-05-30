@@ -34,12 +34,17 @@ public class Dataset<T> {
     @SuppressWarnings("unchecked")
     public Set<T> query(Consumer<T> selectorConsumer, Consumer<QueryPredicate<T>> queryConsumer) throws SQLException {
         FieldSelector<T> fieldSelector = new FieldSelector<>(entity);
+        Set<FieldDescriptor> selectedFields = fieldSelector.getFields();
         QueryPredicate<T> queryPredicate = new QueryPredicate<>(entity);
 
         selectorConsumer.accept(fieldSelector.getProxy());
         queryConsumer.accept(queryPredicate);
 
-        Set<Set<FieldValue>> values = database.query(entity, fieldSelector.getFields(), queryPredicate);
+        // Always select the primary key, otherwise we have no change tracking capabilities.
+        selectedFields.add(entity.getPrimaryKeyField());
+
+        Set<Set<FieldValue>> values = database.query(entity, selectedFields, queryPredicate);
+
         Set<T> instances = new HashSet<>();
 
         for (Set<FieldValue> values0 :
@@ -97,12 +102,16 @@ public class Dataset<T> {
     @SuppressWarnings("unchecked")
     private Optional<T> find(Object id, Set<FieldDescriptor> fields) throws SQLException {
         FieldDescriptor pKeyField = entity.getPrimaryKeyField();
+        Set<FieldDescriptor> selectedFields = new HashSet<>(fields);
+
+        // Always select the primary key, otherwise we have no change tracking capabilities.
+        selectedFields.add(entity.getPrimaryKeyField());
 
         if (!pKeyField.getType().isAssignableFrom(id.getClass())) {
             throw new IllegalArgumentException("The primary key value provided is not compatible with the primary key for the entity.");
         }
 
-        Set<FieldValue> values = database.find(entity, id, fields);
+        Set<FieldValue> values = database.find(entity, id, selectedFields);
 
         if (values.isEmpty()) {
             return Optional.empty();
