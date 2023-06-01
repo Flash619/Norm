@@ -60,6 +60,7 @@ public class ChangeTracker<T> implements InvocationHandler {
 
     public void clear() {
         changes.clear();
+        state = EntityState.UNMODIFIED;
     }
 
     @Override

@@ -2,19 +2,19 @@ package com.travistruttschel.norm;
 
 import com.travistruttschel.norm.entities.*;
 import com.travistruttschel.norm.query.QueryPredicate;
-import com.travistruttschel.norm.tracking.ChangeTracker;
 
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 
 public class DataSet<T> {
+    private final DataClient<?> client;
     private final Driver driver;
     private final EntityDescriptor entity;
-    private final Map<Object, ChangeTracker<T>> changeTrackers = new HashMap<>();
 
-    public DataSet(Driver driver, EntityDescriptor entity) {
-        this.driver = driver;
+    public DataSet(DataClient<?> client, EntityDescriptor entity) {
+        this.client = client;
+        this.driver = client.getDriver();
         this.entity = entity;
     }
 
@@ -78,40 +78,27 @@ public class DataSet<T> {
     }
 
     public T add(T instance) {
-        return getChangeTracker(instance, EntityState.CREATED).getChangeProxy();
+        return client.getChangeTracker(instance, EntityState.CREATED).getChangeProxy();
     }
 
     public T update(T instance) {
-        return getChangeTracker(instance, EntityState.UPDATED).getChangeProxy();
+        return client.getChangeTracker(instance, EntityState.UPDATED).getChangeProxy();
     }
 
     public void delete(T instance) {
-        getChangeTracker(instance, EntityState.DELETED);
+        client.getChangeTracker(instance, EntityState.DELETED);
     }
 
     public T startTracking(T instance) {
-        return getChangeTracker(instance, EntityState.UNMODIFIED).getChangeProxy();
+        return client.getChangeTracker(instance, EntityState.UNMODIFIED).getChangeProxy();
     }
 
     public void stopTracking(T instance) {
-        changeTrackers.remove(instance);
+        client.removeChangeTracker(instance);
     }
 
-    public int saveChanges() throws SQLException {
-        int recordsModified = 0;
-
-        for (Map.Entry<Object, ChangeTracker<T>> entry :
-                changeTrackers.entrySet()) {
-            recordsModified += driver.apply(entry.getValue());
-
-            entry.getValue().clear();
-        }
-
-        return recordsModified;
-    }
-
-    public Driver getDriver() {
-        return driver;
+    public DataClient<?> getClient() {
+        return client;
     }
 
     @SuppressWarnings("unchecked")
@@ -140,15 +127,5 @@ public class DataSet<T> {
         }
 
         return Optional.of(startTracking(instance));
-    }
-
-    private ChangeTracker<T> getChangeTracker(T instance, EntityState state) {
-        ChangeTracker<T> changeTracker = changeTrackers.computeIfAbsent(instance, i ->  new ChangeTracker<>(state, entity, instance));
-
-        if (changeTracker.getState() != state) {
-            changeTracker.setState(state);
-        }
-
-        return changeTracker;
     }
 }

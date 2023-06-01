@@ -39,7 +39,7 @@ public class Examples {
         }
 
         // Execute any pending updates on the database.
-        userDataSet.saveChanges();
+        userDataSet.getClient().saveChanges();
     }
 
     public void createTravis() throws SQLException {
@@ -51,7 +51,7 @@ public class Examples {
 
         userDataSet.add(travis);
 
-        userDataSet.saveChanges();
+        userDataSet.getClient().saveChanges();
     }
 
     public void deleteTravis() throws SQLException {
@@ -67,7 +67,7 @@ public class Examples {
             userDataSet.delete(travis);
         }
 
-        userDataSet.saveChanges();
+        userDataSet.getClient().saveChanges();
     }
 
     public void updateWithoutQuery() throws SQLException {
@@ -84,7 +84,7 @@ public class Examples {
         // Any updates made after change tracking is enabled are still tracked regardless of entity source.
         user.setFirstName("Joseph");
 
-        userDataSet.saveChanges();
+        userDataSet.getClient().saveChanges();
     }
 
     public void transactions() throws SQLException {
@@ -92,12 +92,12 @@ public class Examples {
 
         DataSet<User> userDataSet = dataClient.getDataset(User.class);
 
-        try (Transaction transaction = userDataSet.getDriver().startTransaction()) {
+        try (Transaction transaction = userDataSet.getClient().getDriver().startTransaction()) {
             userDataSet.add(new User("Travis", 31));
             userDataSet.add(new User("Joe", 25));
 
             // Changes saved within a transaction are not persisted until the transaction has been committed.
-            userDataSet.saveChanges();
+            userDataSet.getClient().saveChanges();
 
             Set<User> users = userDataSet.query(u -> {
                 u.getId();
@@ -110,7 +110,7 @@ public class Examples {
             }
 
             // Changes saved within a transaction are not persisted until the transaction has been committed.
-            userDataSet.saveChanges();
+            userDataSet.getClient().saveChanges();
 
             // Transactions must be committed. If try-with-resource exits without commit being called, the transaction
             // will automatically be aborted.
