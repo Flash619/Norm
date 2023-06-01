@@ -64,7 +64,7 @@ public class Examples {
         User travis = users.iterator().next();
 
         if (travis != null) {
-            userDataSet.delete(travis);
+            userDataSet.remove(travis);
         }
 
         userDataSet.getClient().saveChanges();

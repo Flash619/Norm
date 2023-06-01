@@ -85,7 +85,7 @@ public class DataSet<T> {
         return client.getChangeTracker(instance, EntityState.UPDATED).getChangeProxy();
     }
 
-    public void delete(T instance) {
+    public void remove(T instance) {
         client.getChangeTracker(instance, EntityState.DELETED);
     }
 
