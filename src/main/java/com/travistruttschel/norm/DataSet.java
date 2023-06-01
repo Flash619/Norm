@@ -71,7 +71,7 @@ public class DataSet<T> {
 
             instances.add(instance);
 
-            startTracking(instance);
+            client.startTracking(instance);
         }
 
         return instances;
@@ -87,14 +87,6 @@ public class DataSet<T> {
 
     public void delete(T instance) {
         client.getChangeTracker(instance, EntityState.DELETED);
-    }
-
-    public T startTracking(T instance) {
-        return client.getChangeTracker(instance, EntityState.UNMODIFIED).getChangeProxy();
-    }
-
-    public void stopTracking(T instance) {
-        client.removeChangeTracker(instance);
     }
 
     public DataClient<?> getClient() {
@@ -126,6 +118,6 @@ public class DataSet<T> {
             value.getField().setValue(id, value.getValue());
         }
 
-        return Optional.of(startTracking(instance));
+        return Optional.of(client.startTracking(instance));
     }
 }

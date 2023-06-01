@@ -61,7 +61,15 @@ public class DataClient<D extends Driver> implements Closeable {
         return changeTracker;
     }
 
-    void removeChangeTracker(Object instance) {
+    public <T> T startTracking(T instance) {
+        return startTracking(instance, EntityState.UNMODIFIED);
+    }
+
+    public <T> T startTracking(T instance, EntityState entityState) {
+        return getChangeTracker(instance, entityState).getChangeProxy();
+    }
+
+    public void stopTracking(Object instance) {
         changeTrackers.remove(instance);
     }
 
