@@ -1,6 +1,5 @@
 package com.travistruttschel.norm.drivers;
 
-import com.travistruttschel.norm.DataClient;
 import com.travistruttschel.norm.Driver;
 import com.travistruttschel.norm.Transaction;
 import com.travistruttschel.norm.entities.EntityDescriptor;

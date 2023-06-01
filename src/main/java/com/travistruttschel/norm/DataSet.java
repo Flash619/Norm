@@ -62,12 +62,7 @@ public class DataSet<T> {
 
         for (Set<FieldValue> values0 :
                 values) {
-            T instance = (T) entity.getInstance();
-
-            for (FieldValue value :
-                    values0) {
-                value.getField().setValue(instance, value.getValue());
-            }
+            T instance = (T) entity.getInstance(values0);
 
             instances.add(instance);
 
@@ -111,12 +106,7 @@ public class DataSet<T> {
             return Optional.empty();
         }
 
-        T instance = (T) entity.getInstance();
-
-        for (FieldValue value :
-                values) {
-            value.getField().setValue(id, value.getValue());
-        }
+        T instance = (T) entity.getInstance(values);
 
         return Optional.of(client.startTracking(instance));
     }

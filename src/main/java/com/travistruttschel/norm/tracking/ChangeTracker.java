@@ -68,9 +68,15 @@ public class ChangeTracker<T> implements InvocationHandler {
         FieldDescriptor field = fieldsByMethod.get(method);
 
         if (field != null) {
+            Object oldValue = field.getValue(instance);
+            Object returnValue = method.invoke(instance, args);
+            Object newValue = field.getValue(instance);
+
             setState(EntityState.UPDATED);
 
-            changes.add(new FieldChange(field, field.getValue(instance), args[0]));
+            changes.add(new FieldChange(field, oldValue, newValue));
+
+            return returnValue;
         }
 
         return method.invoke(instance, args);

@@ -78,6 +78,17 @@ public class EntityDescriptor {
         return table;
     }
 
+    public Object getInstance(Set<FieldValue> values) throws SQLException {
+        Object instance = getInstance();
+
+        for (FieldValue value :
+                values) {
+            value.getField().setValue(value.getValue(), instance);
+        }
+
+        return instance;
+    }
+
     public Object getInstance() throws SQLException {
         try {
             Constructor<?> constructor = type.getDeclaredConstructor();
