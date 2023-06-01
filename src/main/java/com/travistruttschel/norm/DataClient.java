@@ -1,29 +1,29 @@
 package com.travistruttschel.norm;
 
-import com.travistruttschel.norm.databases.Database;
 import com.travistruttschel.norm.entities.EntityDescriptor;
 import com.travistruttschel.norm.translation.NameTranslator;
 
 import java.util.HashMap;
 
-public class Norm<D extends Database> {
-    private final D database;
+public class DataClient<D extends Driver> {
+    private final D driver;
     private final NameTranslator nameTranslator;
     private final HashMap<Class<?>, EntityDescriptor> entityDescriptors = new HashMap<>();
-    private final HashMap<Class<?>, Dataset<?>> datasets = new HashMap<>();
+    private final HashMap<Class<?>, DataSet<?>> datasets = new HashMap<>();
 
-    Norm(NormBuilder<D> builder) {
-        database = builder.database;
+    DataClient(DataClientBuilder<D> builder) {
+        driver = builder.database;
         nameTranslator = builder.nameTranslator;
+        driver.logger = builder.logger;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Dataset<T> getDataset(Class<T> type) {
-        return (Dataset<T>) datasets.computeIfAbsent(type, t -> new Dataset<>(database, getEntityDescriptor(t)));
+    public <T> DataSet<T> getDataset(Class<T> type) {
+        return (DataSet<T>) datasets.computeIfAbsent(type, t -> new DataSet<>(driver, getEntityDescriptor(t)));
     }
 
-    public D getDatabase() {
-        return database;
+    public D getDriver() {
+        return driver;
     }
 
     public NameTranslator getNameTranslator() {

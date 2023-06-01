@@ -1,6 +1,6 @@
 package com.travistruttschel.norm.entities;
 
-import com.travistruttschel.norm.Norm;
+import com.travistruttschel.norm.DataClient;
 import com.travistruttschel.norm.Table;
 
 import java.lang.reflect.Constructor;
@@ -20,9 +20,9 @@ public class EntityDescriptor {
     private final String schema;
     private final String table;
 
-    public EntityDescriptor(Norm<?> norm, Class<?> type) {
+    public EntityDescriptor(DataClient<?> dataClient, Class<?> type) {
         this.type = type;
-        this.fields = FieldDescriptor.findAll(norm, this);
+        this.fields = FieldDescriptor.findAll(dataClient, this);
 
         FieldDescriptor pKeyField = null;
 
@@ -50,7 +50,7 @@ public class EntityDescriptor {
             table = tableAttr.value();
         } else {
             schema = "";
-            table = norm.getNameTranslator().to(type.getTypeName());
+            table = dataClient.getNameTranslator().to(type.getTypeName());
         }
     }
 

@@ -1,7 +1,7 @@
 package com.travistruttschel.norm.entities;
 
 import com.travistruttschel.norm.Column;
-import com.travistruttschel.norm.Norm;
+import com.travistruttschel.norm.DataClient;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -113,7 +113,7 @@ public class FieldDescriptor {
         return Objects.hash(setter, getter, field, column, type);
     }
 
-    public static Set<FieldDescriptor> findAll(Norm<?> norm, EntityDescriptor entity) {
+    public static Set<FieldDescriptor> findAll(DataClient<?> dataClient, EntityDescriptor entity) {
         HashSet<FieldDescriptor> descriptors = new HashSet<>();
 
         for (Method method :
@@ -140,7 +140,7 @@ public class FieldDescriptor {
 
                 if (column == null) {
                     // We've already trimmed the setter postfix of any weird "get" prefix. Just send it through the translator.
-                    column = norm.getNameTranslator().to(setterPostfix);
+                    column = dataClient.getNameTranslator().to(setterPostfix);
                 }
 
                 for (Method method0 :

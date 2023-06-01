@@ -1,6 +1,5 @@
 package com.travistruttschel.norm;
 
-import com.travistruttschel.norm.databases.Database;
 import com.travistruttschel.norm.entities.*;
 import com.travistruttschel.norm.query.QueryPredicate;
 import com.travistruttschel.norm.tracking.ChangeTracker;
@@ -9,13 +8,13 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Dataset<T> {
-    private final Database database;
+public class DataSet<T> {
+    private final Driver driver;
     private final EntityDescriptor entity;
     private final Map<Object, ChangeTracker<T>> changeTrackers = new HashMap<>();
 
-    public Dataset(Database database, EntityDescriptor entity) {
-        this.database = database;
+    public DataSet(Driver driver, EntityDescriptor entity) {
+        this.driver = driver;
         this.entity = entity;
     }
 
@@ -32,6 +31,20 @@ public class Dataset<T> {
     }
 
     @SuppressWarnings("unchecked")
+    public T query(String sql) throws SQLException {
+        Set<FieldValue> values = driver.query(sql, entity);
+        T instance = (T) entity.getInstance();
+
+        for (FieldValue value :
+                values) {
+            value.getField().setValue(value.getValue(), instance);
+        }
+
+        return instance;
+    }
+
+
+    @SuppressWarnings("unchecked")
     public Set<T> query(Consumer<T> selectorConsumer, Consumer<QueryPredicate<T>> queryConsumer) throws SQLException {
         FieldSelector<T> fieldSelector = new FieldSelector<>(entity);
         Set<FieldDescriptor> selectedFields = fieldSelector.getFields();
@@ -43,7 +56,7 @@ public class Dataset<T> {
         // Always select the primary key, otherwise we have no change tracking capabilities.
         selectedFields.add(entity.getPrimaryKeyField());
 
-        Set<Set<FieldValue>> values = database.query(entity, selectedFields, queryPredicate);
+        Set<Set<FieldValue>> values = driver.query(entity, selectedFields, queryPredicate);
 
         Set<T> instances = new HashSet<>();
 
@@ -57,6 +70,8 @@ public class Dataset<T> {
             }
 
             instances.add(instance);
+
+            startTracking(instance);
         }
 
         return instances;
@@ -87,7 +102,7 @@ public class Dataset<T> {
 
         for (Map.Entry<Object, ChangeTracker<T>> entry :
                 changeTrackers.entrySet()) {
-            recordsModified += database.apply(entry.getValue());
+            recordsModified += driver.apply(entry.getValue());
 
             entry.getValue().clear();
         }
@@ -95,8 +110,8 @@ public class Dataset<T> {
         return recordsModified;
     }
 
-    public Database getDatabase() {
-        return database;
+    public Driver getDriver() {
+        return driver;
     }
 
     @SuppressWarnings("unchecked")
@@ -111,7 +126,7 @@ public class Dataset<T> {
             throw new IllegalArgumentException("The primary key value provided is not compatible with the primary key for the entity.");
         }
 
-        Set<FieldValue> values = database.find(entity, id, selectedFields);
+        Set<FieldValue> values = driver.find(entity, id, selectedFields);
 
         if (values.isEmpty()) {
             return Optional.empty();
