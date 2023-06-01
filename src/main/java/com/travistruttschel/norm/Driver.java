@@ -1,4 +1,4 @@
-package com.travistruttschel.norm.databases;
+package com.travistruttschel.norm.drivers;
 
 import com.travistruttschel.norm.entities.EntityDescriptor;
 import com.travistruttschel.norm.entities.FieldDescriptor;
@@ -9,7 +9,7 @@ import com.travistruttschel.norm.tracking.ChangeTracker;
 import java.sql.SQLException;
 import java.util.Set;
 
-public interface Database {
+public interface Driver {
     int apply(ChangeTracker<?> changeTracker) throws SQLException;
     Set<FieldValue> find(EntityDescriptor entity, Object id, Set<FieldDescriptor> fields);
     Set<Set<FieldValue>> query(EntityDescriptor entity, Set<FieldDescriptor> fields, QueryPredicate<?> predicate);
